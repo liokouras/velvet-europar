@@ -187,7 +187,7 @@ fn main() {
     } else if app.eq("gen_arr") {
         use std::{fs::{self,File}, io::{BufWriter, Write}};
         const CHUNK_INTS: usize = 1_000_000;
-        let filename = format!("/local/badia/data/sort_arr_{}_{}.bin", n, seed);
+        let filename = format!("../../data/sort_arr_{}_{}.bin", n, seed);
         let file = File::create(&filename).unwrap();
         let mut writer = BufWriter::with_capacity(8 * 1024 * 1024, file);
 

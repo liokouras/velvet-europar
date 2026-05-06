@@ -357,7 +357,7 @@ impl DistanceTable {
         let range: Uniform<usize> = Uniform::try_from(0..100).unwrap();
         let mut rng = StdRng::seed_from_u64(seed); 
 
-        let filename = format!("/local/badia/data/dist_tab_{}_{}.txt", ntowns, seed);
+        let filename = format!("../../data/dist_tab_{}_{}.txt", ntowns, seed);
         let file = File::create(&filename)?;
         let mut writer = BufWriter::new(file);
 
