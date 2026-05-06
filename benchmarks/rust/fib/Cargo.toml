@@ -1,0 +1,16 @@
+[package]
+name = "fib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+velvet = {git = "https://github.com/liokouras/velvet.git"}
+core_affinity = "0.8.3"
+
+[build-dependencies]
+velvet = {git = "https://github.com/liokouras/velvet.git"}
+
+[features]
+stats = ["velvet/stats"]
+test_direct_rec = []
+test_no_thresh = []

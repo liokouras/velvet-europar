@@ -1,0 +1,17 @@
+[package]
+name = "matmul_unsafe"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+velvet = {git = "https://github.com/liokouras/velvet.git"}
+rayon = {version = "1.11.0", optional = true}
+core_affinity = "0.8.3"
+
+[build-dependencies]
+velvet = {git = "https://github.com/liokouras/velvet.git"}
+
+[features]
+rayon = ["dep:rayon"]
+stats = ["velvet/stats"]
+test_direct_rec = []
