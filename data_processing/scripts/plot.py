@@ -12,8 +12,12 @@ plt.rcParams['legend.fontsize'] = 12
 plt.rcParams['axes.titlesize'] = 16
 
 # plt.rcParams.update({'font.size': plt.rcParams['font.size'] + 4})
-plt.rc('text', usetex=True)
-plt.rcParams['text.latex.preamble'] = r'\boldmath'
+# plt.rc('text', usetex=True)
+# plt.rcParams['text.latex.preamble'] = r'\boldmath'
+plt.rc('text', usetex=False)
+plt.rcParams['mathtext.fontset'] = 'stix'
+plt.rcParams['font.weight'] = 'bold'
+plt.rcParams['axes.labelweight'] = 'bold'
 
 blues = ["#92c5f2", "#5699d6", "#1f77b4"]
 oranges = ['#ff7f0e', "#943611",]
@@ -212,6 +216,8 @@ def plot_runtimes_w_speedups(data, ax, ax_nr):
 
     for i, (version, v, (m, c)) in enumerate(datalist):
         group = df[df["version"] == v].sort_values("threads")
+        if group.empty: continue
+
         means = group["mean"].values
         lo_err = (group["mean"] - group["min"]).values
         hi_err = (group["max"] - group["mean"]).values

@@ -1,3 +1,4 @@
+import os
 from process_data import prepare_averages, compute_speedup, prepare_stats, add_time_per_spawn, compute_wo
 from print import print_workoverhead, print_stats, print_speedups, print_c_comp
 from plot import plot_c_comp, plot_speedup, SHOW, SAVE
@@ -51,7 +52,7 @@ def c_comparison(avgs, filename, mode=SHOW):
                 raise ValueError(f"No sequential matmul unsafe version found")
             seq_unsafe = seq_unsafe_row['mean'].values[0]
             if seq_unsafe < seq:
-                seq = seq_unsafe
+                seq = -3
 
         # speedup has to be relative to the fastest sequential overall!
         spdp_rust = compute_speedup(avg, skip=[11,12], seq=seq)
@@ -74,7 +75,7 @@ def main():
     
     parser.add_argument(
         "action",
-        choices=["all", "tab1", "tab2", "fig1", "fig2", "rayon-comp","c-comp"],
+        choices=["all", "rust-only", "tab1", "tab2", "fig1", "fig2", "rayon-comp","c-comp"],
         help="Which table or figure to generate."
     )
 
@@ -99,8 +100,9 @@ def main():
 
     stats_paths = [(f'{args.path}/stats/{app}/', app) for app, _ in apps.items()]
 
-    filename1 = f'figs/fig1_vs_rayon.pdf'
-    filename2 = f'figs/fig2_vs_c.pdf'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    filename1 = os.path.join(script_dir, '../figs/fig1_vs_rayon.pdf')
+    filename2 = os.path.join(script_dir, '../figs/fig2_vs_c.pdf')
     avgs = {}
     for file, app, cols in data_files:
         avg = prepare_averages(file, cols, app)
@@ -115,6 +117,10 @@ def main():
         work_overhead(avgs)
         rayon_comparison(avgs, filename1, mode=mode)
         c_comparison(avgs, filename2, mode=mode)
+    elif args.action == "rust-only":
+        stats(avgs, stats_paths)
+        work_overhead(avgs)
+        rayon_comparison(avgs, filename1, mode=mode)
     elif args.action == "tab1":
         stats(avgs, stats_paths)
     elif args.action == "tab2":
