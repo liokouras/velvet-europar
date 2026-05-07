@@ -14,7 +14,7 @@ echo "FIB benchmark. Saving logs to $OUT"
 echo "version,num_workers,n,threshold,time_secs" > "$OUT"
 
 # TODO adjust!
-N=42
+N=50
 
 if [ "$HAVE_RUST" = "true" ]; then
     cd ../rust/fib/

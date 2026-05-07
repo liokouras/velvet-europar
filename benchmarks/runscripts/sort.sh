@@ -1,8 +1,12 @@
 #!/bin/bash
 
 THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
-THREADS_CHECK=(16 32)
-ACTIVE_THREADS=("${THREADS_CHECK[@]}")
+ACTIVE_THREADS=()
+for t in "${THREADS_FULL[@]}"; do
+    if [ "$t" -le "$6" ]; then
+        ACTIVE_THREADS+=("$t")
+    fi
+done
 
 ITERS_FULL=(1 1 1 1 1 1)
 ITERS_CHECK=(1 1 1)
@@ -20,7 +24,7 @@ echo "SORT benchmark. Saving logs to $OUT"
 echo "version,num_workers,threshold,array_length,random_seed,time_secs" > "$OUT"
 
 # TODO ADJUST!
-N=20000000
+N=2000000000
 SEED=42
 
 if [ "$HAVE_RUST" = "true" ]; then
@@ -61,7 +65,12 @@ if [ "$HAVE_RUST" = "true" ]; then
         taskset -c 0 cargo run --release --features "test_direct_rec" test_direct $N $SEED 1 >> "$OUT" 2>> "$DUMP"
     done
 
-    cd ../sort_unsafe/
+    # create data for C-applications to use
+    cargo run --release gen_arr $N $SEED >> "$DUMP" 2>> "$DUMP"
+
+    cd - > /dev/null
+    cd ../rust/sort_unsafe/
+
     echo "running SORT-UNSAFE serial elision"
     for iter in "${ACTIVE_ITERS[@]}"; do
         taskset -c 0 cargo run --release par_seq $N $SEED >> "$OUT" 2>> "$DUMP"
@@ -76,9 +85,6 @@ if [ "$HAVE_RUST" = "true" ]; then
             taskset -c "$CORES" cargo run --release velvet $N $SEED >> "$OUT" 2>> "$DUMP"
         done
     done
-
-    # create data for C-applications to use
-    cargo run --release gen_arr $N $SEED >> "$DUMP" 2>> "$DUMP"
 
     cd - > /dev/null
 fi
@@ -114,6 +120,24 @@ if [ "$HAVE_CLANG_OMP" = "true" ]; then
 fi
 
 if [ "$HAVE_OPENCILK" = "true" ]; then
-    #TODO
-    echo "cilk coming!"
+    cd ../c/
+
+    # ensure Rust sort is compiled
+    cd sort_rs
+    cargo build --release
+    cd ..
+
+    make -C ./cilk/sort/
+
+    echo "running SORT cilk"
+    for threads in "${ACTIVE_THREADS[@]}"
+    do
+        export CILK_NWORKERS=$threads 
+        CORES=$(seq -s, 0 $((threads - 1)))
+        for iter in "${ACTIVE_ITERS[@]}"; do
+            taskset -c "$CORES" "./zout/${APP}_cilk" cilk $N $SEED >> "$OUT" 2>> "$DUMP"
+        done
+    done
+
+    cd - > /dev/null
 fi

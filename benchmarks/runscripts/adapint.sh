@@ -1,11 +1,15 @@
 #!/bin/bash
 
 THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
-THREADS_CHECK=(16)
-ACTIVE_THREADS=("${THREADS_CHECK[@]}")
+ACTIVE_THREADS=()
+for t in "${THREADS_FULL[@]}"; do
+    if [ "$t" -le "$6" ]; then
+        ACTIVE_THREADS+=("$t")
+    fi
+done
 
 ITERS_FULL=(1 1 1 1 1 1)
-ITERS_CHECK=(1)
+ITERS_CHECK=(1 1 1)
 ACTIVE_ITERS=("${ITERS_CHECK[@]}")
 
 HAVE_RUST="$3"
@@ -19,6 +23,7 @@ DUMP="${2}/adapint.dump"
 echo "ADAPINT benchmark. Saving logs to $OUT"
 echo "version,num_workers,a,b,epsilon,threshold,time_secs" > "$OUT"
 
+#TODO adjust...
 A=-10000
 B=4000000
 E=0.0001
@@ -85,6 +90,19 @@ if [ "$HAVE_CLANG_OMP" = "true" ]; then
 fi
 
 if [ "$HAVE_OPENCILK" = "true" ]; then
-    #TODO
-    echo "cilk coming!"
+    cd ../c/
+
+    $OPENCILK_HOME/bin/clang -L$OPENCILK_HOME/lib -L$OPENCILK_HOME/lib64 -fopencilk -O3 "./cilk/$APP/${APP}.c" -lm -o "./zout/${APP}_cilk"
+
+    echo "running ADAPINT cilk"
+    for threads in "${ACTIVE_THREADS[@]}"
+    do
+        export CILK_NWORKERS=$threads 
+        CORES=$(seq -s, 0 $((threads - 1)))
+        for iter in "${ACTIVE_ITERS[@]}"; do
+            taskset -c "$CORES" "./zout/${APP}_cilk" cilk $A $B $E >> "$OUT" 2>> "$DUMP"
+        done
+    done
+
+    cd - > /dev/null
 fi

@@ -1,8 +1,12 @@
 #!/bin/bash
 
 THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
-THREADS_CHECK=(16 32)
-ACTIVE_THREADS=("${THREADS_CHECK[@]}")
+ACTIVE_THREADS=()
+for t in "${THREADS_FULL[@]}"; do
+    if [ "$t" -le "$6" ]; then
+        ACTIVE_THREADS+=("$t")
+    fi
+done
 
 ITERS_FULL=(1 1 1 1 1 1)
 ITERS_CHECK=(1 1 1)
@@ -20,10 +24,10 @@ echo "BH benchmark. Saving logs to $OUT"
 echo "version,num_workers,bucket_size,spawn_threshold,total_time,tree_time,forces_time,bodies_time" > "$OUT"
 
 #TODO adjust...
-DATA="three_plummers_2M"
+DATA="three_plummers_4M_wider"
 INPUT="/local/badia/data/$DATA.txt"
 OUTPUT="/local/badia/data/$DATA.txt"
-ITERS=1
+ITERS=5
 
 if [ "$HAVE_RUST" = "true" ]; then
     cd ../rust/bh/
@@ -97,6 +101,19 @@ if [ "$HAVE_CLANG_OMP" = "true" ]; then
 fi
 
 if [ "$HAVE_OPENCILK" = "true" ]; then
-    #TODO
-    echo "cilk coming!"
+    cd ../c/
+
+    $OPENCILK_HOME/bin/clang -L$OPENCILK_HOME/lib -L$OPENCILK_HOME/lib64 -fopencilk -O3 "./cilk/$APP/${APP}.c" "./cilk/$APP/quad_body.c" "./cilk/$APP/driver.c" -lm -o "./zout/${APP}_cilk"
+
+    echo "running BH cilk"
+    for threads in "${ACTIVE_THREADS[@]}"
+    do
+        export CILK_NWORKERS=$threads 
+        CORES=$(seq -s, 0 $((threads - 1)))
+        for iter in "${ACTIVE_ITERS[@]}"; do
+            taskset -c "$CORES" "./zout/${APP}_cilk" cilk $INPUT $OUTPUT $ITERS >> "$OUT" 2>> "$DUMP"
+        done
+    done
+
+    cd - > /dev/null
 fi

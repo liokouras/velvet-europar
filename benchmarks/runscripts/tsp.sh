@@ -1,8 +1,12 @@
 #!/bin/bash
 
 THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
-THREADS_CHECK=(16 32)
-ACTIVE_THREADS=("${THREADS_CHECK[@]}")
+ACTIVE_THREADS=()
+for t in "${THREADS_FULL[@]}"; do
+    if [ "$t" -le "$6" ]; then
+        ACTIVE_THREADS+=("$t")
+    fi
+done
 
 ITERS_FULL=(1 1 1 1 1 1)
 ITERS_CHECK=(1 1 1)
@@ -20,7 +24,7 @@ echo "TSP benchmark. Saving logs to $OUT"
 echo "version,num_workers,ntowns,seed,seq_threshold,time_secs" > "$OUT"
 
 # TODO ADJUST!
-N=16
+N=19
 SEED=25
 
 if [ "$HAVE_RUST" = "true" ]; then
@@ -91,6 +95,19 @@ if [ "$HAVE_CLANG_OMP" = "true" ]; then
 fi
 
 if [ "$HAVE_OPENCILK" = "true" ]; then
-    #TODO
-    echo "cilk coming!"
+    cd ../c/
+
+    $OPENCILK_HOME/bin/clang -L$OPENCILK_HOME/lib -L$OPENCILK_HOME/lib64 -fopencilk -O3 "./cilk/$APP/${APP}.c" "./cilk/$APP/distance_table.c" -lm -o "./zout/${APP}_cilk"
+
+    echo "running TSP cilk"
+    for threads in "${ACTIVE_THREADS[@]}"
+    do
+        export CILK_NWORKERS=$threads 
+        CORES=$(seq -s, 0 $((threads - 1)))
+        for iter in "${ACTIVE_ITERS[@]}"; do
+            taskset -c "$CORES" "./zout/${APP}_cilk" cilk $N $SEED >> "$OUT" 2>> "$DUMP"
+        done
+    done
+
+    cd - > /dev/null
 fi
