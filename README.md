@@ -2,7 +2,7 @@
 
 This artifact contains all relevant resources to reproduce the results presented in the paper *Velvet: Parallel Divide-and-Conquer in Safe Rust*. There are two key parts: the first reproduces the tables and figures in the paper using our original data; the second runs a reduced version of all experiments and produces corresponding tables and figures from the output. All source code and data is hosted in this repository.
 
-A fully formatted version of this document is available as [as a pdf](OverviewDocument.pdf).
+A fully formatted version of this document is available as [a pdf](OverviewDocument.pdf).
 
 ---
 
@@ -33,7 +33,7 @@ To compile and run the experiments, the following software components are needed
 |---|---|
 | Linux OS | Rocky Linux 9.7 (Blue Onyx) |
 | Rust toolchain | rustc 1.93.1 (stable), Cargo (via rustup) |
-| C compiler | Clang 20.1.8 |
+| Clang | 20.1.8 |
 | Make | GNU Make 4.3 |
 | OpenMP | 5.1 (via Clang) |
 | OpenCilk | 2.1 (built with Clang, Git 2.47.3 and CMake 3.26.5) |
