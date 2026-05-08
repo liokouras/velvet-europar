@@ -11,9 +11,6 @@ plt.rcParams['axes.labelsize'] = 14
 plt.rcParams['legend.fontsize'] = 12
 plt.rcParams['axes.titlesize'] = 16
 
-# plt.rcParams.update({'font.size': plt.rcParams['font.size'] + 4})
-# plt.rc('text', usetex=True)
-# plt.rcParams['text.latex.preamble'] = r'\boldmath'
 plt.rc('text', usetex=False)
 plt.rcParams['mathtext.fontset'] = 'stix'
 plt.rcParams['font.weight'] = 'bold'
@@ -28,16 +25,16 @@ LABELS_MATMUL = [(2,"Velvet",('o', oranges[0])), (1,"Rayon, Ours",('^', blues[2]
 LABELS_BH = [(2,"Velvet",('o', oranges[0])), (5,"Rayon, ChildIter",('^',blues[2])), (1,"Rayon, TreeIter",('^', blues[1])), (6,"Rayon, BodyIter",('^',blues[0]))]
 LABELS_SORT = [(2,"Velvet",('o', oranges[0])), (1,"Rayon",('^', blues[2])), (3, "Velvet, Unsafe Application",('o', oranges[1]))]
 
-LABEL_C_COMP = [(r'\textbf{Velvet}', 2, ('o', oranges[0])), (r'\textbf{Cilk}', 12, ('^', colours[0])), (r'\textbf{OpenMP}', 11, ('s', colours[1]))]
-LABEL_C_COMP_UNSAFE =[(r'\textbf{Velvet}', 2, ('o', oranges[0])), (r'\textbf{Velvet, Unsafe Application}', 3, ('o', oranges[1])), (r'\textbf{Cilk}', 12, ('^', colours[0])), (r'\textbf{OpenMP}', 11, ('s', colours[1]))]
+LABEL_C_COMP = [("Velvet", 2, ('o', oranges[0])), ("Cilk", 12, ('^', colours[0])), ("OpenMP", 11, ('s', colours[1]))]
+LABEL_C_COMP_UNSAFE =[("Velvet", 2, ('o', oranges[0])), ("Velvet, Unsafe Application", 3, ('o', oranges[1])), ("Cilk", 12, ('^', colours[0])), ("OpenMP", 11, ('s', colours[1]))]
 
-APP_NAMES=[r'\textbf{Fibonacci (\textit{fib})}',
-           r'\textbf{Adaptive Integration (\textit{adapint})}', 
-           r'\textbf{Traveling Salesperson (\textit{tsp})}', 
-           r'\textbf{N-Queens (\textit{nqueen})}', 
-           r'\textbf{Barnes-Hut (\textit{bh})}', 
-           r'\textbf{Matrix Multiplication (\textit{matmul})}', 
-           r'\textbf{Merge Sort (\textit{sort})}']
+APP_NAMES=["Fibonacci (fib)",
+           "Adaptive Integration (adapint)", 
+           "Traveling Salesperson (tsp)", 
+           "N-Queens (nqueen)", 
+           "Barnes-Hut (bh)", 
+           "Matrix Multiplication (matmul)", 
+           "Merge Sort (sort)"]
 
 SETTINGS = {
     "adapint": (1, LABEL_VERSION, LABEL_C_COMP),
@@ -103,7 +100,7 @@ def plot_speedup_ax(data, ax):
         ax.plot(
             group["threads"],
             group["speedup"],
-            label = fr'\textbf{{{label}}}',
+            label = f"{label}",
             marker=marker,
             c=colour
         )
@@ -112,7 +109,7 @@ def plot_speedup_ax(data, ax):
     ax.plot(
         [tmin, tmax],
         [tmin, tmax],
-        label=r'\textbf{Linear}',
+        label="Linear",
         linestyle='--',
         color='black'
     )
@@ -127,8 +124,8 @@ def plot_speedup_ax(data, ax):
         ax.set_yticks(np.arange(0, tmax+1, 16))
 
     ax.set_title(APP_NAMES[title_id])
-    ax.set_ylabel(r'\textbf{Speedup over serial}')
-    ax.set_xlabel(r'\textbf{Threads}')
+    ax.set_ylabel("Speedup over serial")
+    ax.set_xlabel("Threads")
 
     ax.grid(axis='y', which='major', linestyle='--', alpha=0.6, zorder=0)
     ax.grid(axis='y', which='minor', linestyle=':', alpha=0.5, zorder=0)
@@ -188,9 +185,9 @@ def plot_runtimes_w_speedups(data, ax, ax_nr):
 
     # sequentials
     if app == 'matmul':
-        serial_data = [(r'\textbf{Serial Rust}', 0, colours[2]), (r'\textbf{Serial Unsafe Rust}', -3, colours[4]), (r'\textbf{Serial C}', 10, colours[3])]
+        serial_data = [("Serial Rust", 0, colours[2]), ("Serial Unsafe Rust", -3, colours[4]), ("Serial C", 10, colours[3])]
     else:
-        serial_data = [(r'\textbf{Serial Rust}', 0, colours[2]), (r'\textbf{Serial C}', 10, colours[3])]
+        serial_data = [("Serial Rust", 0, colours[2]), ("Serial C", 10, colours[3])]
     for i, (version, v, c) in enumerate(serial_data):
         group = df[(df["version"] == v)]
         if group.empty: continue
@@ -257,14 +254,14 @@ def plot_runtimes_w_speedups(data, ax, ax_nr):
         step = 10
     top = np.floor((ymax + step) / step) * step
     ax.set_ylim(0, top+1)
-    ax.set_ylabel(r'\textbf{Runtime (seconds)}')
+    ax.set_ylabel("Runtime (seconds)")
 
     tmax = thread_counts[-1]
     ax_speedup.set_ylim(0, tmax+1)
     ax_speedup.plot(
         x[1:] + bar_width,   # Center the line on the middle bar of each group
         thread_counts,       # Speedup value = thread count
-        label=r'\textbf{Linear}', 
+        label="Linear", 
         linestyle='--', 
         color='black', 
         alpha=0.7,
@@ -278,7 +275,7 @@ def plot_runtimes_w_speedups(data, ax, ax_nr):
     if ax_nr%3 != 2:
         ax_speedup.tick_params(axis='y', which='both', labelright=False, right=True) # hide y-axis tick labels
     else:
-        ax_speedup.set_ylabel(r'\textbf{Speedup over fastest serial}')
+        ax_speedup.set_ylabel("Speedup over fastest serial")
 
     
     # --- X-axis (categorical placement) ---
@@ -286,7 +283,7 @@ def plot_runtimes_w_speedups(data, ax, ax_nr):
     unique_threads = np.insert(unique_threads, 0, 1)
     ax.set_xticks(x + bar_width)
     ax.set_xticklabels(unique_threads.astype(int))
-    ax.set_xlabel(r'\textbf{Threads}')
+    ax.set_xlabel("Threads")
 
     # --- Styling ---
     ax.set_title(APP_NAMES[title_id])

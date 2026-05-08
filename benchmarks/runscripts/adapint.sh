@@ -1,32 +1,38 @@
 #!/bin/bash
 
-THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
-ACTIVE_THREADS=()
-for t in "${THREADS_FULL[@]}"; do
-    if [ "$t" -le "$6" ]; then
-        ACTIVE_THREADS+=("$t")
-    fi
-done
-
-ITERS_FULL=(1 1 1 1 1 1)
-ITERS_CHECK=(1 1 1)
-ACTIVE_ITERS=("${ITERS_CHECK[@]}")
-
 HAVE_RUST="$3"
 HAVE_CLANG_OMP="$4"
 HAVE_OPENCILK="$5"
-
+MAX_CORES="$6"
+RUN_MODE="$7"
 APP="adapint"
 OUT="${1}/${APP}.csv"
 DUMP="${2}/adapint.dump"
 
+THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
+ITERS_FULL=(1 1 1 1 1 1)
+ITERS_REDUCED=(1 1 1)
+
+if [ "$RUN_MODE" = "full" ]; then
+    ACTIVE_THREADS=("${THREADS_FULL[@]}")
+    ACTIVE_ITERS=("${ITERS_FULL[@]}")
+    A=-10000
+    B=4000000
+    E=0.0001
+else
+    for t in "${THREADS_FULL[@]}"; do
+        if [ "$t" -le "$6" ]; then
+            ACTIVE_THREADS+=("$t")
+        fi
+    done
+    ACTIVE_ITERS=("${ITERS_REDUCED[@]}")
+    A=0
+    B=800000
+    E=0.0001
+fi
+
 echo "ADAPINT benchmark. Saving logs to $OUT"
 echo "version,num_workers,a,b,epsilon,threshold,time_secs" > "$OUT"
-
-#TODO adjust...
-A=-10000
-B=4000000
-E=0.0001
 
 if [ "$HAVE_RUST" = "true" ]; then
     cd ../rust/adapint/

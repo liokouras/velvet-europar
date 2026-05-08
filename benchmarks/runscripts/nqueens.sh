@@ -1,30 +1,34 @@
 #!/bin/bash
 
-THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
-ACTIVE_THREADS=()
-for t in "${THREADS_FULL[@]}"; do
-    if [ "$t" -le "$6" ]; then
-        ACTIVE_THREADS+=("$t")
-    fi
-done
-
-ITERS_FULL=(1 1 1 1 1 1)
-ITERS_CHECK=(1 1 1)
-ACTIVE_ITERS=("${ITERS_CHECK[@]}")
-
 HAVE_RUST="$3"
 HAVE_CLANG_OMP="$4"
 HAVE_OPENCILK="$5"
-
+MAX_CORES="$6"
+RUN_MODE="$7"
 APP="nqueens"
 OUT="${1}/${APP}.csv"
 DUMP="${2}/nqueens.dump"
 
+THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
+ITERS_FULL=(1 1 1 1 1 1)
+ITERS_REDUCED=(1 1 1)
+
+if [ "$RUN_MODE" = "full" ]; then
+    ACTIVE_THREADS=("${THREADS_FULL[@]}")
+    ACTIVE_ITERS=("${ITERS_FULL[@]}")
+    N=16
+else
+    for t in "${THREADS_FULL[@]}"; do
+        if [ "$t" -le "$6" ]; then
+            ACTIVE_THREADS+=("$t")
+        fi
+    done
+    ACTIVE_ITERS=("${ITERS_REDUCED[@]}")
+    N=15
+fi
+
 echo "NQUEENS benchmark. Saving logs to $OUT"
 echo "version,num_workers,n,threshold,time_secs" > "$OUT"
-
-# TODO ADJUST!
-N=16
 
 if [ "$HAVE_RUST" = "true" ]; then
     cd ../rust/nqueens/

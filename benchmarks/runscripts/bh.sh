@@ -1,33 +1,42 @@
 #!/bin/bash
 
-THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
-ACTIVE_THREADS=()
-for t in "${THREADS_FULL[@]}"; do
-    if [ "$t" -le "$6" ]; then
-        ACTIVE_THREADS+=("$t")
-    fi
-done
-
-ITERS_FULL=(1 1 1 1 1 1)
-ITERS_CHECK=(1 1 1)
-ACTIVE_ITERS=("${ITERS_CHECK[@]}")
-
 HAVE_RUST="$3"
 HAVE_CLANG_OMP="$4"
 HAVE_OPENCILK="$5"
-
+MAX_CORES="$6"
+RUN_MODE="$7"
 APP="bh"
 OUT="${1}/${APP}.csv"
 DUMP="${2}/bh.dump"
 
+THREADS_FULL=(1 2 4 8 16 32 48 64 80 96 112 128)
+ITERS_FULL=(1 1 1 1 1 1)
+ITERS_REDUCED=(1 1 1)
+
+if [ "$RUN_MODE" = "full" ]; then
+    ACTIVE_THREADS=("${THREADS_FULL[@]}")
+    ACTIVE_ITERS=("${ITERS_FULL[@]}")
+    #TODO adjust...
+    DATA="three_plummers_4M_wider"
+    INPUT="/local/badia/data/$DATA.txt"
+    OUTPUT="/local/badia/data/$DATA.txt"
+    ITERS=5
+else
+    for t in "${THREADS_FULL[@]}"; do
+        if [ "$t" -le "$6" ]; then
+            ACTIVE_THREADS+=("$t")
+        fi
+    done
+    ACTIVE_ITERS=("${ITERS_REDUCED[@]}")
+    #TODO adjust...
+    DATA="two_plummers_1M"
+    INPUT="/local/badia/data/$DATA.txt"
+    OUTPUT="/local/badia/data/$DATA.txt"
+    ITERS=5
+fi
+
 echo "BH benchmark. Saving logs to $OUT"
 echo "version,num_workers,bucket_size,spawn_threshold,total_time,tree_time,forces_time,bodies_time" > "$OUT"
-
-#TODO adjust...
-DATA="three_plummers_4M_wider"
-INPUT="/local/badia/data/$DATA.txt"
-OUTPUT="/local/badia/data/$DATA.txt"
-ITERS=5
 
 if [ "$HAVE_RUST" = "true" ]; then
     cd ../rust/bh/

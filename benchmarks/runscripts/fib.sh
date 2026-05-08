@@ -1,20 +1,24 @@
 #!/bin/bash
 
-ITERS_FULL=(1 1 1 1 1 1)
-ITERS_CHECK=(1 1 1)
-ACTIVE_ITERS=("${ITERS_CHECK[@]}")
-
 HAVE_RUST="$3"
-
+RUN_MODE="$7"
 APP="fib"
 OUT="${1}/${APP}.csv"
 DUMP="${2}/fib.dump"
 
+ITERS_FULL=(1 1 1 1 1 1)
+ITERS_REDUCED=(1 1 1)
+
+if [ "$RUN_MODE" = "full" ]; then
+    ACTIVE_ITERS=("${ITERS_FULL[@]}")
+    N=52
+else
+    ACTIVE_ITERS=("${ITERS_REDUCED[@]}")
+    N=48
+fi
+
 echo "FIB benchmark. Saving logs to $OUT"
 echo "version,num_workers,n,threshold,time_secs" > "$OUT"
-
-# TODO adjust!
-N=50
 
 if [ "$HAVE_RUST" = "true" ]; then
     cd ../rust/fib/
