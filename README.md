@@ -61,8 +61,8 @@ To process data and produce the tables and figures in the paper, Python 3.7 and 
 
 - **The Artifact** — clone and enter the main directory:
   ```bash
-  git clone https://github.com/liokouras/velvet_europar.git
-  cd velvet_europar
+  git clone https://github.com/liokouras/velvet-europar.git
+  cd velvet-europar
   ```
 
 #### Smoke Test
@@ -95,7 +95,7 @@ The raw output data from our own experiments is included in the artifact. Most i
 The artifact has the following high-level structure:
 
 ```
-velvet_europar/
+velvet-europar/
 ├── benchmarks/
 │   ├── c/
 │   ├── runscripts/
@@ -127,7 +127,7 @@ Tables are printed to `data_processing/processing_output.txt` and figures are sa
 
 ### 2.2 Running the Benchmarks
 
-> *This part requires a multi-core Linux machine and, at minimum, the Rust toolchain. OpenMP and OpenCilk are necessary to reproduce the results in Figure 2.*
+> *This part requires a multi-core Linux machine and, at minimum, the Rust toolchain. OpenMP and OpenCilk are necessary to reproduce the results in Figure 2. On our hardware, it takes is approximately 4,5 hours to execute all benchmarks on 64 physical cores.*
 
 Run the following command from inside `velvet_europar`:
 ```bash
